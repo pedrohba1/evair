@@ -1,0 +1,57 @@
+# ============================================================
+# Python
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+.eggs/
+.venv/
+venv/
+env/
+dist/
+build/
+.hatch/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ============================================================
+# Segredos / certificados — NUNCA versionar
+# ============================================================
+# Arquivo de ambiente com valores reais. O .env.example é versionado
+# (placeholders), mas qualquer outro .env* é segredo.
+.env
+.env.*
+!.env.example
+
+# Material de chave privada (certificado ICP-Brasil e-CNPJ A1 etc.)
+*.pfx
+*.p12
+*.key
+*.pem
+*.crt
+*.cer
+certs/
+
+# ============================================================
+# Saídas locais / temporários
+# ============================================================
+*.log
+output/
+tmp/
+*.tmp
+
+# ============================================================
+# Sistema operacional / editores
+# ============================================================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
