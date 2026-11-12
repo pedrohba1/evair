@@ -1,4 +1,4 @@
-# EVAIR — Emissor virtual agêntico integrado da Receita
+# EVAIR — Emissor virtual agêntico integrador da Receita
 
 O EVAIR recebe a descrição de um serviço em português, monta um rascunho de
 nota fiscal, pede sua revisão e aprovação no chat, e emite a **NFS-e** pela
