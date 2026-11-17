@@ -11,6 +11,9 @@ from __future__ import annotations
 import base64
 import gzip
 import json
+import os
+import shutil
+import tempfile
 from dataclasses import dataclass, field
 
 import httpx
@@ -42,21 +45,27 @@ def _gunzip_b64(b64: str) -> bytes:
 class SefinClient:
     def __init__(self, base_url: str, bundle: CertBundle, timeout: float = 60.0):
         self.base_url = base_url.rstrip("/")
-        self._bundle = bundle
+        # httpx espera caminhos de arquivo para o cert mTLS; gravamos os PEMs
+        # em um diretório temporário (apagado em close()).
+        self._tmpdir = tempfile.mkdtemp(prefix="evair_mtls_")
+        self._cert_path = os.path.join(self._tmpdir, "cert.pem")
+        self._key_path = os.path.join(self._tmpdir, "key.pem")
+        with open(self._cert_path, "wb") as fh:
+            fh.write(bundle.cert_pem)
+        with open(self._key_path, "wb") as fh:
+            fh.write(bundle.key_pem)
+        os.chmod(self._key_path, 0o600)
+
         self._client = httpx.Client(
             timeout=timeout,
-            cert=(
-                # httpx aceita caminhos ou bytes PEM. Usamos bytes do cert p/ não
-                # depender de arquivos temporários.
-                _pem_to_certfile(bundle),
-                _pem_to_keyfile(bundle),
-            ),
+            cert=(self._cert_path, self._key_path),
             headers={"Content-Type": "application/json; charset=utf-8",
                      "Accept": "application/json"},
         )
 
     def close(self) -> None:
         self._client.close()
+        shutil.rmtree(self._tmpdir, ignore_errors=True)
 
     def __enter__(self) -> "SefinClient":
         return self
@@ -104,11 +113,3 @@ class SefinClient:
         return EmitirResultado(
             ok=False, status_code=resp.status_code, erros=erros, raw=body
         )
-
-
-def _pem_to_certfile(bundle: CertBundle) -> bytes:
-    return bundle.cert_pem
-
-
-def _pem_to_keyfile(bundle: CertBundle) -> bytes:
-    return bundle.key_pem

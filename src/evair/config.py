@@ -14,6 +14,25 @@ def _env(name: str, default: str = "") -> str:
     return os.environ.get(name, default).strip()
 
 
+def _load_dotenv(path: str = ".env") -> None:
+    """Carrega um arquivo .env simples (KEY=VALUE) se ainda não estiver no ambiente.
+
+    Variáveis já exportadas no shell têm precedência (não são sobrescritas).
+    """
+    p = Path(path)
+    if not p.exists():
+        return
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
 @dataclass(frozen=True)
 class EmissorConfig:
     ambiente: int  # 1=produção, 2=homologação
@@ -36,14 +55,15 @@ class EmissorConfig:
 
 
 def load_config() -> EmissorConfig:
-    cnpj = _env("NFS_E_CNPJ", "00000000000191")
+    _load_dotenv()
+    cnpj = _env("NFS_E_CNPJ", "39982868000170")
     im = _env("NFS_E_INSCRICAO_MUNICIPAL") or None
     pfx = _env("NFS_E_CERT_PFX")
     return EmissorConfig(
         ambiente=int(_env("NFS_E_AMBIENTE", "2")),
         cnpj=cnpj,
         inscricao_municipal=im,
-        cod_municipio=_env("NFS_E_COD_MUNICIPIO", "3205200"),
+        cod_municipio=_env("NFS_E_COD_MUNICIPIO", "3170206"),
         ver_aplic=_env("NFS_E_VER_APLIC", "EVAIR_0.1.0"),
         cert_pfx=Path(pfx) if pfx else None,
         cert_senha=_env("NFS_E_CERT_SENHA"),

@@ -13,11 +13,13 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import re
 from dataclasses import dataclass
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.x509.oid import NameOID
 from lxml import etree
 
 from .dps import NS_DSIG, NS_NFSE
@@ -41,14 +43,11 @@ class CertBundle:
     cert_der_b64: str  # base64 do DER, para <X509Certificate>
 
 
-def load_pfx(path: str, senha: str | None) -> CertBundle:
-    """Carrega um .pfx/.p12 (A1) e extrai chave privada + certificado."""
+def load_pfx_bytes(data: bytes, senha: str | None) -> CertBundle:
+    """Extrai chave privada + certificado de bytes .pfx/.p12 (A1)."""
     from cryptography.hazmat.primitives.serialization import (
         pkcs12, Encoding, PrivateFormat, NoEncryption,
     )
-
-    with open(path, "rb") as fh:
-        data = fh.read()
 
     key, cert, _additional = pkcs12.load_key_and_certificates(
         data, senha.encode() if senha else None
@@ -60,6 +59,27 @@ def load_pfx(path: str, senha: str | None) -> CertBundle:
     cert_pem = cert.public_bytes(Encoding.PEM)
     cert_der_b64 = base64.b64encode(cert.public_bytes(Encoding.DER)).decode()
     return CertBundle(key_pem=key_pem, cert_pem=cert_pem, cert_der_b64=cert_der_b64)
+
+
+def load_pfx(path: str, senha: str | None) -> CertBundle:
+    """Carrega um .pfx/.p12 (A1) do disco e extrai chave + certificado."""
+    with open(path, "rb") as fh:
+        return load_pfx_bytes(fh.read(), senha)
+
+
+def cert_info(bundle: CertBundle) -> dict[str, str | None]:
+    """Resume o certificado para exibição (subject, CN, CNPJ, validade)."""
+    cert = x509.load_pem_x509_certificate(bundle.cert_pem)
+    subject = cert.subject.rfc4514_string()
+    cn_attrs = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
+    cn = str(cn_attrs[0].value) if cn_attrs else None
+    m = re.search(r"\d{14}", subject)
+    return {
+        "subject": subject,
+        "cn": cn,
+        "cnpj": m.group(0) if m else None,
+        "valido_ate": cert.not_valid_after_utc.isoformat(),
+    }
 
 
 def _c14n_exc(elem: etree._Element) -> bytes:

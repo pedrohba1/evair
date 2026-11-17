@@ -47,9 +47,9 @@ def montar_dps(cfg) -> DPS:
         prestador=Prestador(
             cnpj=cfg.cnpj,
             inscricao_municipal=cfg.inscricao_municipal,
-            razao_social="EMPRESA PRESTADORA DE SERVICOS LTDA",
+            razao_social="BUFULINK DESENVOLVIMENTO DE SOFTWARE LTDA",
             telefone="34999990000",
-            email="contato@prestador.com.br",
+            email="pedro@bufu.link",
             regime=RegimeTributario(),
         ),
         tomador=Tomador(

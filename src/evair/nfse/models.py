@@ -17,9 +17,10 @@ from pydantic import BaseModel, Field
 AMBIENTE_PRODUCAO = 1
 AMBIENTE_HOMOLOGACAO = 2
 
-# Tipo de inscrição federal no Id da DPS
-TP_INSCRICAO_CNPJ = "1"
-TP_INSCRICAO_CPF = "2"
+# Tipo de inscrição federal no Id da DPS (regra oficial Sefin/ADN):
+#   1 = CPF, 2 = CNPJ  (atenção: ordem diferente da NF-e!)
+TP_INSCRICAO_CPF = "1"
+TP_INSCRICAO_CNPJ = "2"
 
 
 class RegimeTributario(BaseModel):
@@ -62,8 +63,11 @@ class Servico(BaseModel):
 
 class TributacaoMunicipal(BaseModel):
     trib_issqn: str = "1"
-    tp_ret_issqn: str = "2"  # 2 = não retido (ajustar conforme o caso)
-    p_aliq: str = "2.50"  # alíquota em percentual, 2 casas
+    # 1 = não retido (prestador recolhe); 2 = retido pelo tomador; 3 = intermediário
+    tp_ret_issqn: str = "1"
+    # Alíquota % (0-1 casas). Omitir (None) quando o prestador é não optante
+    # do Simples e o município de incidência está ATIVO no ADN (regra E0617).
+    p_aliq: str | None = None
 
 
 class Piscofins(BaseModel):
@@ -79,7 +83,12 @@ class Piscofins(BaseModel):
 class Tributacao(BaseModel):
     municipal: TributacaoMunicipal = Field(default_factory=TributacaoMunicipal)
     piscofins: Piscofins = Field(default_factory=Piscofins)
-    ind_tot_trib: str = "0"
+    # Percentuais aproximados do total de tributos (Lei 12.741/2012).
+    # Para NÃO optante do Simples (opSimpNac=1), o grupo totTrib usa pTotTrib —
+    # a regra E0713 proíbe indTotTrib/pTotTribSN. Ajuste p/ percentuais reais.
+    p_tot_trib_fed: str = "0.00"
+    p_tot_trib_est: str = "0.00"
+    p_tot_trib_mun: str = "0.00"
 
 
 class Valores(BaseModel):
@@ -96,6 +105,8 @@ class DPS(BaseModel):
     n_dps: str  # número cru, sem zero à esquerda (ex. "1")
     data_competencia: date  # dCompet (AAAA-MM-DD)
     tp_emitente: str = "1"  # 1 = prestador
+    fin_nfse: str = "0"  # finalidade: 0=regular, 1=crédito, 2=débito (NT 009)
+    ind_dest: str = "0"  # destinatário: 0=o próprio tomador, 1=outro (NT 009)
     cod_municipio_emissor: str  # IBGE do município emissor (conveniado)
     prestador: Prestador
     tomador: Tomador | None = None

@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 
 from lxml import etree
 
-from .models import DPS
+from .models import DPS, TP_INSCRICAO_CNPJ
 
 NS_NFSE = "http://www.sped.fazenda.gov.br/nfse"
 NS_DSIG = "http://www.w3.org/2000/09/xmldsig#"
@@ -64,7 +64,7 @@ def build_dps_xml(dps: DPS, *, now: datetime | None = None) -> bytes:
     inf = etree.SubElement(root, _q("infDPS"))
     inf.set("Id", build_id_dps(
         dps.cod_municipio_emissor,
-        "1",  # prestador CNPJ
+        TP_INSCRICAO_CNPJ,  # prestador é CNPJ (tpInsc: 1=CPF, 2=CNPJ)
         dps.prestador.cnpj,
         dps.serie,
         dps.n_dps,
@@ -77,6 +77,9 @@ def build_dps_xml(dps: DPS, *, now: datetime | None = None) -> bytes:
     _sub(inf, "nDPS", dps.n_dps)
     _sub(inf, "dCompet", dps.data_competencia.isoformat())
     _sub(inf, "tpEmit", dps.tp_emitente)
+    # NT 009 release 1: finNFSe tornou-se obrigatório (1-1), logo após tpEmit
+    # e ANTES de cLocEmi. O XSD público v1.01 ainda não reflete isso.
+    _sub(inf, "finNFSe", dps.fin_nfse)
     _sub(inf, "cLocEmi", dps.cod_municipio_emissor)
 
     # ---- prestador ----
@@ -134,7 +137,8 @@ def build_dps_xml(dps: DPS, *, now: datetime | None = None) -> bytes:
     tm = etree.SubElement(trib, _q("tribMun"))
     _sub(tm, "tribISSQN", dps.valores.tributos.municipal.trib_issqn)
     _sub(tm, "tpRetISSQN", dps.valores.tributos.municipal.tp_ret_issqn)
-    _sub(tm, "pAliq", dps.valores.tributos.municipal.p_aliq)
+    if dps.valores.tributos.municipal.p_aliq is not None:
+        _sub(tm, "pAliq", dps.valores.tributos.municipal.p_aliq)
     tf = etree.SubElement(trib, _q("tribFed"))
     pc = etree.SubElement(tf, _q("piscofins"))
     p = dps.valores.tributos.piscofins
@@ -146,7 +150,10 @@ def build_dps_xml(dps: DPS, *, now: datetime | None = None) -> bytes:
     _sub(pc, "vCofins", p.v_cofins)
     _sub(pc, "tpRetPisCofins", p.tp_ret_pis_cofins)
     tt = etree.SubElement(trib, _q("totTrib"))
-    _sub(tt, "indTotTrib", dps.valores.tributos.ind_tot_trib)
+    pt = etree.SubElement(tt, _q("pTotTrib"))
+    _sub(pt, "pTotTribFed", dps.valores.tributos.p_tot_trib_fed)
+    _sub(pt, "pTotTribEst", dps.valores.tributos.p_tot_trib_est)
+    _sub(pt, "pTotTribMun", dps.valores.tributos.p_tot_trib_mun)
 
     return etree.tostring(
         root,
