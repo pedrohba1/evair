@@ -1,6 +1,6 @@
 [project]
 name = "evair"
-version = "0.1.0"
+version = "0.2.0"
 description = "EVAIR - Emissor de NFS-e (Sistema Nacional NFS-e / Sefin Nacional) com agente LangGraph"
 requires-python = ">=3.11"
 dependencies = [
@@ -12,10 +12,21 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Etapa 2 (agente): descomentar quando for montar o LangGraph
-# agent = ["langgraph>=0.2", "langchain>=0.3", "langchain-ollama>=0.2"]
+# Etapa 2 (agente LangGraph) — extração estruturada + aprovação humana.
+agent = [
+    "langgraph>=0.2",
+    "langchain-core>=0.3",
+    "langchain-openai>=0.2",
+]
+# Etapa 3 (servidor HTTP local sem estado).
+server = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.30",
+    "sse-starlette>=2.0",
+]
 dev = [
     "pytest>=8.0",
+    "pytest-asyncio>=0.23",
 ]
 
 [build-system]
