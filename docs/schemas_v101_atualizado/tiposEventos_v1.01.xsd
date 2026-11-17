@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		   xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+           targetNamespace="http://www.sped.fazenda.gov.br/nfsevia"
+           xmlns="http://www.sped.fazenda.gov.br/nfsevia"
+           attributeFormDefault="unqualified"
+           elementFormDefault="qualified">
+
+	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig-core-schema_v1.00.xsd"/>
+	<xs:include schemaLocation="tiposSimples_v1.01.xsd"/>
+
+	<xs:complexType name="TCEventoViaProc">
+		<xs:sequence>
+			<xs:element name="evento" type="TCEventoVia"/>
+			<xs:element name="protEventoVia" type="TCInfProtEventoVia"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="TCInfProtEventoVia">
+		<xs:sequence>
+			<xs:element name="infProt" type="TCProtEventoVia" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="TCProtEventoVia">
+		<xs:sequence>
+			<xs:element name="tpAmb" type="TSTipoAmbiente" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="verAplic" type="TSVersaoEmissor" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="chNFSeVia" type="TSChaveNFSeVia" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="tpEventoVia" type="TSTipoEventoVia" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="nSeqEvento" type="TSNum3Dig" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="dhRecbto" type="TSDateTimeUTC" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="nProt" type="TSNumProtocolo" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="TSTipoEventoVia">
+		<xs:annotation>
+			<xs:documentation>
+				Tipos de eventos:
+				101101 - Cancelamento de NFS-e Via
+				105102 - Cancelamento para Substituição de NFS-e Via
+				203202 - Manifestação de Informação do Adquirente da NFS-e Via - Com Aceite
+				203204 - Manifestação de Informação do Adquirente da NFS-e Via - Com Rejeição
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:whiteSpace value="preserve"/>
+			<xs:enumeration value="101101"/>
+			<xs:enumeration value="105102"/>
+			<xs:enumeration value="203202"/>
+			<xs:enumeration value="203204"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:complexType name="TCEventoVia">
+		<xs:sequence>
+			<xs:element name="infEventoVia" type="TCInfEventoVia"/>
+			<xs:element ref="ds:Signature"/>
+		</xs:sequence>
+		<xs:attribute name="versao" type="TSVerNFSeVia" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="TCInfEventoVia">
+		<xs:sequence>
+			<xs:element name="tpAmb" type="TSTipoAmbiente" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="verAplic" type="TSVersaoEmissor" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="dhEvento" type="TSDateTimeUTC" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="chNFSeVia" type="TSChaveNFSeVia" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="nSeqEvento" type="TSNum3Dig" minOccurs="1" maxOccurs="1"/>			
+			<xs:choice>
+				<xs:element name="e101101" type="TE101101">
+					<xs:annotation>
+						<xs:documentation>Evento de cancelamento</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="e105102" type="TE105102">
+					<xs:annotation>
+						<xs:documentation>Evento de cancelamento por substituição</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				   <xs:element name="e203202" type="TE203202">
+					   <xs:annotation>
+						   <xs:documentation>Evento de Manifestação de Informação do Adquirente - Com Aceite</xs:documentation>
+					   </xs:annotation>
+				   </xs:element>
+				   <xs:element name="e203204" type="TE203204">
+					   <xs:annotation>
+						   <xs:documentation>Evento de Manifestação de Informação do Adquirente - Com Rejeição</xs:documentation>
+					   </xs:annotation>
+				   </xs:element>
+			</xs:choice>
+		</xs:sequence>
+		<xs:attribute name="id" type="TSIdEvento" use="required"/>
+	</xs:complexType>
+
+	<!--TIPO COMPLEXO PARA O EVENTO DE CANCELAMENTO-->
+	<xs:complexType name="TE101101">
+		<xs:sequence>
+			<xs:element name="xDesc">
+				<xs:annotation>
+					<xs:documentation>
+						Descrição do evento: "Cancelamento de NFS-e Via".
+					</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:whiteSpace value="preserve"/>
+						<xs:enumeration value="Cancelamento de NFS-e Via"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="cMotivo" type="TSCodJustCanc">
+				<xs:annotation>
+					<xs:documentation>Código de justificativa de cancelamento</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="xMotivo" type="TSMotivo">
+				<xs:annotation>
+					<xs:documentation>Descrição para explicitar o motivo indicado neste evento</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!--TIPO COMPLEXO PARA O EVENTO DE CANCELAMENTO POR SUBSTITUIÇÃO-->
+	<xs:complexType name="TE105102">
+		<xs:sequence>
+			<xs:element name="xDesc">
+				<xs:annotation>
+					<xs:documentation>
+						Descrição do evento: "Cancelamento de NFS-e Via por Substituição".
+					</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:whiteSpace value="preserve"/>
+						<xs:enumeration value="Cancelamento de NFS-e Via por Substituicao"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="cMotivo" type="TSCodJustSubst">
+				<xs:annotation>
+					<xs:documentation>Código de justificativa de cancelamento substituição</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="xMotivo" type="TSMotivo" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Descrição para explicitar o motivo indicado neste evento</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="chSubstituta" type="TSChaveNFSeVia">
+				<xs:annotation>
+					<xs:documentation>Chave de Acesso da NFS-e Via substituta.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+   <!--TIPO COMPLEXO PARA O EVENTO DE MANIFESTAÇÃO - COM ACEITE-->
+   <xs:complexType name="TE203202">
+	   <xs:sequence>
+		   <xs:element name="xDesc">
+			<xs:annotation>
+				   <xs:documentation>Descrição do evento: "Manifestação de Informação do Adquirente da NFS-e Via - Com Aceite"</xs:documentation>
+			   </xs:annotation>
+			   <xs:simpleType>
+					<xs:restriction base="xs:string">
+					<xs:enumeration value="Manifestação de Informação do Adquirente da NFS-e Via - Com Aceite"/>
+					<xs:whiteSpace value="preserve"/>
+				   </xs:restriction>
+			   </xs:simpleType>
+		   </xs:element>
+		   <xs:element name="tpNi">
+			   <xs:annotation>
+				   <xs:documentation>Tipo de Identificação do Adquirente: 1 - CPF; 2 - CNPJ</xs:documentation>
+			   </xs:annotation>
+			   <xs:simpleType>
+				   <xs:restriction base="xs:string">
+					   <xs:enumeration value="1"/>
+					   <xs:enumeration value="2"/>
+				   </xs:restriction>
+			   </xs:simpleType>
+		   </xs:element>
+		   <xs:element name="CNPJCPF">
+			   <xs:annotation>
+				   <xs:documentation>CNPJ ou CPF do Adquirente da NFS-e Via</xs:documentation>
+			   </xs:annotation>
+			   <xs:simpleType>
+				   <xs:restriction base="xs:string">
+					   <xs:whiteSpace value="preserve"/>
+					   <xs:minLength value="11"/>
+					   <xs:maxLength value="14"/>
+					   <xs:pattern value="^([0-9]{11}|[A-Z0-9]{12}[0-9]{2})$"/>
+				   </xs:restriction>
+			   </xs:simpleType>
+		   </xs:element>
+		   <xs:element name="xRazaoSocial">
+			   <xs:annotation>
+				   <xs:documentation>Nome ou Razão Social do Adquirente (2 a 60 caracteres)</xs:documentation>
+			   </xs:annotation>
+			   <xs:simpleType>
+				   <xs:restriction base="xs:string">
+					   <xs:minLength value="2"/>
+					   <xs:maxLength value="60"/>
+					   <xs:pattern value="^[^&lt;&gt;&amp;&quot;']{2,60}$"/>
+					   <xs:whiteSpace value="preserve"/>
+				   </xs:restriction>
+			   </xs:simpleType>
+		   </xs:element>
+	   </xs:sequence>
+   </xs:complexType>
+
+   <!--TIPO COMPLEXO PARA O EVENTO DE MANIFESTAÇÃO - COM REJEIÇÃO-->
+   <xs:complexType name="TE203204">
+	   <xs:sequence>
+		   <xs:element name="xDesc">
+			   <xs:annotation>
+				   <xs:documentation>Descrição do evento: "Manifestação de Informação do Adquirente da NFS-e Via - Com Rejeição"</xs:documentation>
+			   </xs:annotation>
+			   <xs:simpleType>
+					<xs:restriction base="xs:string">
+					<xs:enumeration value="Manifestação de Informação do Adquirente da NFS-e Via - Com Rejeição"/>
+					<xs:whiteSpace value="preserve"/>					
+				   </xs:restriction>
+			   </xs:simpleType>
+		   </xs:element>
+		   <xs:element name="tpNi">
+			   <xs:annotation>
+				   <xs:documentation>Tipo de Identificação do Adquirente: 1 - CPF; 2 - CNPJ</xs:documentation>
+			   </xs:annotation>
+			   <xs:simpleType>
+				   <xs:restriction base="xs:string">
+					   <xs:enumeration value="1"/>
+					   <xs:enumeration value="2"/>
+				   </xs:restriction>
+			   </xs:simpleType>
+		   </xs:element>
+		   <xs:element name="CNPJCPF">
+			   <xs:annotation>
+				   <xs:documentation>CNPJ ou CPF do Adquirente da NFS-e Via</xs:documentation>
+			   </xs:annotation>
+			   <xs:simpleType>
+				   <xs:restriction base="xs:string">
+					   <xs:whiteSpace value="preserve"/>
+					   <xs:minLength value="11"/>
+					   <xs:maxLength value="14"/>
+					   <xs:pattern value="^([0-9]{11}|[A-Z0-9]{12}[0-9]{2})$"/>
+				   </xs:restriction>
+			   </xs:simpleType>
+		   </xs:element>
+		   <xs:element name="xRazaoSocial">
+			   <xs:annotation>
+				   <xs:documentation>Nome ou Razão Social do Adquirente (2 a 60 caracteres)</xs:documentation>
+			   </xs:annotation>
+			   <xs:simpleType>
+				   <xs:restriction base="xs:string">
+					   <xs:minLength value="2"/>
+					   <xs:maxLength value="60"/>
+					   <xs:pattern value="^[^&lt;&gt;&amp;&quot;']{2,60}$"/>
+					   <xs:whiteSpace value="preserve"/>
+				   </xs:restriction>
+			   </xs:simpleType>
+		   </xs:element>
+			<xs:element name="cCodMotivoRejeicao" type="TSCodMotivoRejeicaoManif">
+				<xs:annotation>
+					<xs:documentation>Código do motivo de rejeição da NFS-e Via pelo adquirente do Serviço de Exploração de via</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		   <xs:element name="xMotivoRejeita" minOccurs="0">
+			   <xs:annotation>
+				   <xs:documentation>Motivo da Rejeição da NFS-e Via pelo adquirente do Serviço de Exploração de via (15 a 55 caracteres)</xs:documentation>
+			   </xs:annotation>
+			   <xs:simpleType>
+				   <xs:restriction base="xs:string">
+					   <xs:minLength value="15"/>
+					   <xs:maxLength value="55"/>
+					   <xs:whiteSpace value="preserve"/>
+				   </xs:restriction>
+			   </xs:simpleType>
+		   </xs:element>
+	   </xs:sequence>
+   </xs:complexType>
+</xs:schema>

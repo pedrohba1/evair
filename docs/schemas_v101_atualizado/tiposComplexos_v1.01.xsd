@@ -1,0 +1,226 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+           targetNamespace="http://www.sped.fazenda.gov.br/nfsevia"
+           xmlns="http://www.sped.fazenda.gov.br/nfsevia"
+           attributeFormDefault="unqualified"
+           elementFormDefault="qualified">
+
+	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig-core-schema_v1.00.xsd"/>
+	<xs:include schemaLocation="tiposSimples_v1.01.xsd"/>
+
+	<xs:complexType name="TCNFSeViaProc">
+		<xs:sequence>
+			<xs:element name="NFSeVia" type="TCNFSeVia"/>
+			<xs:element name="protNFSeVia" type="TCInfProtNFSeVia"/>
+		</xs:sequence>
+	</xs:complexType>
+
+
+	<xs:complexType name="TCInfProtNFSeVia">
+		<xs:sequence>
+			<xs:element name="infProt" type="TCProtNFSeVia" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="TCProtNFSeVia">
+		<xs:sequence>
+			<xs:element name="tpAmb" type="TSTipoAmbiente" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="verAplic" type="TSVersaoEmissor" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="chNFSeVia" type="TSChaveNFSeVia" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="dhRecbto" type="TSDateTimeUTC" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="nProt" type="TSNumProtocolo" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>		
+	</xs:complexType>
+	
+	<!--TIPO COMPLEXO NFS-e Via-->
+	<xs:complexType name="TCNFSeVia">
+		<xs:sequence>
+			<xs:element name="infNFSeVia" type="TCInfNFSeVia"/>
+			<xs:element ref="ds:Signature"/>
+		</xs:sequence>
+		<xs:attribute name="versao" type="TSVerNFSeVia" use="required"/>
+	</xs:complexType>
+
+
+	<!-- Tipo complexo para o grupo infNFSeVia -->
+	<xs:complexType name="TCInfNFSeVia">
+		<xs:sequence>			
+			<xs:element name="tpAmb" type="TSTipoAmbiente" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="verAplic" type="TSVersaoEmissor" minOccurs="1" maxOccurs="1"/>			
+			<xs:element name="cStat" type="TStat" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="dhEmi" type="TSEmissaoDateTimeUTC" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="dhCompet" type="TSCompetenciaDateTimeUTC" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="subst" type="TCSubst" minOccurs="0" maxOccurs="1" />
+			<xs:element name="fornec" type="TCFornec" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="serv" type="TCServ" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="valores" type="TCValores" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="TSIdNFSeVia" use="required"/>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo subst -->
+	<xs:complexType name="TCSubst">
+		<xs:sequence>
+			<xs:element name="chSubstda" type="TSChaveNFSeVia" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="cMotivo" type="TSMotivoSubstituicao" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="xMotivo" type="TSDescricaoMotivoSubstituicao" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo fornec -->
+	<xs:complexType name="TCFornec">
+		<xs:sequence>
+			<xs:element name="CNPJ" type="TSCNPJFornec" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="xNome" type="TSNomeFornecDesc150" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="cMun" type="TSMunFornec" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo serv -->
+	<xs:complexType name="TCServ">
+		<xs:sequence>
+			<xs:element name="cLocOper" type="TSLocOperCodMunIBGE" minOccurs="1" maxOccurs="1"/>				
+			<xs:element name="xLocOper" type="TSLocOperDesc150" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="cPracaEmi" type="TSPracaEmiCodigo" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="xPracaEmi" type="TSPracaEmiDesc150" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="kmPracaEmi" type="TSKmPracaEmi" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="cLocEmi" type="TSLocEmiCodMunIBGE" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="xLocEmi" type="TSLocEmiDesc150" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="nNFSeVia" type="TSNumNFSeVia" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="serie" type="TSSerie" minOccurs="1" maxOccurs="1"/>			
+			<xs:element name="cTribNac" type="TSCodTribNac" minOccurs="1" maxOccurs="1"/>			
+			<xs:element name="cNBS" type="TSNBS" minOccurs="1" maxOccurs="1"/>			
+			<xs:element name="explVia" type="TCExplVia" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo explVia -->
+	<xs:complexType name="TCExplVia">
+		<xs:sequence>
+			<xs:element name="categVeic" type="TSCategoriaVeiculo" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="sentido" type="TSSentido" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="placa" type="TSPlaca" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="codAcessoPed" type="TSCodAcessoPedagio" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="modPassagem" type="TSModPassagem" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="codContrato" type="TSCodContrato" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="xInfComp" type="TSDesc2000" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo valores -->
+	<xs:complexType name="TCValores">
+		<xs:sequence>
+			<xs:element name="vServ" type="TSServDesc15V2" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="modPagamento" type="TSModPagamento" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="vDescCondIncond" minOccurs="0" maxOccurs="1" type="TCDescCondIncond"/>
+			<xs:element name="trib" type="TCTrib" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo vDescCondIncond -->
+	<xs:complexType name="TCDescCondIncond">
+		<xs:sequence>
+			<xs:element name="vDescIncond" type="TSDescIncondDesc15V2" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="vDescCond" type="TSDescCondDesc15V2" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo trib -->
+	<xs:complexType name="TCTrib">
+		<xs:sequence>
+			<xs:element name="issqn" type="TCISSQN" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="tribFed" type="TCTribFed" minOccurs="0" maxOccurs="1" />
+			<xs:element name="ibscbs" type="TCIBSCBS" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo issqn -->
+	<xs:complexType name="TCISSQN">
+		<xs:sequence>						
+			<xs:element name="vBC" type="TSBCDesc15V2" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="pAliq" type="TSAliqDesc2V2" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="vISSQN" type="TSISSQNDesc15V2" minOccurs="1" maxOccurs="1"/>				
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo exigSusp -->
+	<xs:complexType name="TCExigSusp">
+		<xs:sequence>
+			<xs:element name="tpSusp" type="TSOpExigSuspensa" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="nProcesso" type="TSNumProcExigSuspensa" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo tribFed -->
+	<xs:complexType name="TCTribFed">
+		<xs:sequence>
+			<xs:element name="piscofins" type="TCPiscofins" minOccurs="0" maxOccurs="1" />			
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo piscofins -->
+	<xs:complexType name="TCPiscofins">
+		<xs:sequence>
+			<xs:element name="CST" type="TSTipoCST" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="vBCPisCofins" type="TSBCPisCofinsDesc15V2" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="pAliqPis" type="TSAliqPisDesc2V2" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="pAliqCofins" type="TSAliqCofinsDesc2V2" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="vPis" type="TSPisDesc15V2" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="vCofins" type="TSCofinsDesc15V2" minOccurs="0" maxOccurs="1"/>			
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo ibscbs -->
+	<xs:complexType name="TCIBSCBS">
+		<xs:sequence>			
+			<xs:element name="CST" type="TSCodCST" minOccurs="1" maxOccurs="1"/>						
+			<xs:element name="cClassTrib" type="TSCodClassTrib" minOccurs="1" maxOccurs="1"/>			
+			<xs:element name="cIndOp" type="TSIndOperacao" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="vBC" type="TSBCIBSCBSDesc15V2" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="vLiq" type="TSLiqIBSCBSDesc15V2" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="vTotNF" type="TSTotNFIBSCBSDesc15V2" minOccurs="1" maxOccurs="1"/>				
+			<xs:element name="gIBS" type="TCGIBS" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="gCBS" type="TCCBS" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>	
+
+	<!-- Tipo complexo para o grupo gIBS -->
+	<xs:complexType name="TCGIBS">
+		<xs:sequence>
+			<xs:element name="vIBSTot" type="TSIBSTotDesc15V2" minOccurs="1" maxOccurs="1"/>				
+			<xs:element name="uf" type="TCIBSUF"/>
+			<xs:element name="mun" minOccurs="1" maxOccurs="1" type="TCIBSMun"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo uf -->
+	<xs:complexType name="TCIBSUF">
+		<xs:sequence>
+			<xs:element name="pAliqEfetUF" type="TSAliqEfetUFDesc2V2" minOccurs="1" maxOccurs="1"/>			
+			<xs:element name="vIBSUF" type="TSValorIBSUFDesc15V2" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo mun -->
+	<xs:complexType name="TCIBSMun">
+		<xs:sequence>
+			<xs:element name="pAliqEfetMun"  type="TSAliqEfetMunDesc2V2" minOccurs="1" maxOccurs="1"/>	
+			<xs:element name="vIBSMun" type="TSValorIBSMunDesc15V2" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Tipo complexo para o grupo CBS -->
+	<xs:complexType name="TCCBS">
+		<xs:sequence>
+			<xs:element name="pAliq" type="TSPercCBSDesc2V2" minOccurs="1" maxOccurs="1"/>			
+			<xs:element name="vCBS" type="TSValorCBSDesc15V2" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+
+</xs:schema>
+
+
+
+
+
